@@ -62,7 +62,14 @@ class BookingController extends Controller
      */
     public function store(Request $request)
     {
+   
+       $bus=Bus::with('routes')->where('id',$request->destname)->first();
+       $booking=Booking::Where('buesid',$bus->id)->get();
+       $sumOfOffsets = $booking->sum('nooffsets');
+       $value=($bus->available_seats)-($sumOfOffsets);
+       return view('User.busbookin',compact('value','bus'));
        
+
     }
 
     /**
@@ -74,14 +81,10 @@ class BookingController extends Controller
     public function show($id)
     {
         $routes=Route::where('destination_id' , $id)->first();
-        $bus=Bus::Where('route_id',$routes->id)->first();
-        // $query = Booking::query();
-        // $query->where('buesid', 'LIKE', "{$bus->id}%");
-        $booking=Booking::Where('buesid',$bus->id)->get();
-        
-        $sumOfOffsets = $booking->sum('nooffsets');
-        $value=($bus->available_seats)-($sumOfOffsets);
-       return view('User.bookingfile');
+
+         $bus=Bus::with('routes')->get();
+       
+       return view('User.bookingfile',compact('bus'));
     }
 
     /**
@@ -103,8 +106,22 @@ class BookingController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
-        //
+    {  $busid=Bus::where('name',$request->busname)->first();
+    
+        $request->validate([
+            'name' => 'required',
+            'availableseate' => 'required',
+            'bookingse'=>'required',
+            'busname'=>'required',
+        ]);
+        $dest = new Booking();
+        $dest->name_student = $request->name;
+        $dest->buesid=$busid->id;
+        $dest->nooffsets = $request->bookingse;
+        $dest->save();
+        $dests=Destination::all();
+        return redirect()->route('booking.index');
+        
     }
 
     /**

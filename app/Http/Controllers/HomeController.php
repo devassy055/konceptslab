@@ -42,14 +42,16 @@ class HomeController extends Controller
         {
             if(password_verify($userpasss, $user->password)) {
                 //dd('user');
-                return view('home');
+                return redirect()->route('booking.index');
+               
             }
             if(password_verify($adminpasss, $user->password)) {
+
                  //dd('admin');
-                 return view('home');
+                 return redirect()->route('user.index');
              }
 
-            return view('home');
+            //return view('home');
         }
         else{
             return redirect('login')->with(Auth::logout());
